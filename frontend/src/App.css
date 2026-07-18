@@ -150,6 +150,13 @@ body {
   overflow-y: auto;
 }
 
+.sources-panel {
+  max-width: 320px;
+  min-width: 280px;
+  border-right: 1px solid #ddd;
+  background: #fafafa;
+}
+
 .transcript-panel {
   border-right: 1px solid #ddd;
   background: #fff;
@@ -162,4 +169,55 @@ body {
 .placeholder-text {
   color: #999;
   margin-top: 1rem;
+}
+
+.upload-area {
+  margin-bottom: 1rem;
+}
+
+.upload-btn {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+.source-list {
+  list-style: none;
+}
+
+.source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.source-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.source-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+  word-break: break-all;
+}
+
+.source-meta {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.btn-small {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }

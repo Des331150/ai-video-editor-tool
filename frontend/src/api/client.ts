@@ -12,13 +12,17 @@ export async function apiRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const { headers: customHeaders, ...restOptions } = options;
+  const { headers: customHeaders, body, ...restOptions } = options;
+  const isFormData = body instanceof FormData;
+  const headers: Record<string, string> = {};
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+  Object.assign(headers, customHeaders);
   const response = await fetch(`${API_BASE}${path}`, {
     ...restOptions,
-    headers: {
-      "Content-Type": "application/json",
-      ...customHeaders,
-    },
+    body,
+    headers,
   });
 
   if (!response.ok) {
