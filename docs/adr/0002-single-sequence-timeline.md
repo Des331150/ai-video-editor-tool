@@ -1,0 +1,3 @@
+# Single Main Sequence Timeline (Designed for Multi-Track Later)
+
+The Timeline is a single ordered sequence of Segments with audio and video locked together, rather than a multi-track layout (independent video, audio, overlay tracks). This simplifies the data model, the transcript-timeline sync, and the UX for solo creators who don't need parallel tracks. The Segment model and the Timeline interface are designed so that multi-track support can be added later without breaking existing projects — for example, a Segment carries an optional "track identifier" that is currently always the same value.

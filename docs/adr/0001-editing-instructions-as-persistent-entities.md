@@ -1,0 +1,3 @@
+# Editing Instructions as Persistent, First-Class Entities
+
+Natural-language commands are stored as discrete, persistent `EditingInstruction` entities rather than being applied ephemerally. This enables undo/redo across a linear history stack, auditability of what was commanded, and a foundation for future branching (experimental edits on forks). The trade-off is storage and data-model complexity for a solo-creator tool that could have gotten away with simpler ephemeral application. We accepted this because undoable AI edits are central to the product's value proposition — a user needs to experiment freely and revert without fear.
