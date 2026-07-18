@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProject } from "../api/projects";
 import { listSources, uploadSource, deleteSource } from "../api/sources";
+import { getTranscript } from "../api/transcripts";
 import type { Project } from "../api/projects";
 import type { SourceMedia } from "../api/sources";
+import type { TranscriptEntry } from "../api/transcripts";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -46,6 +48,8 @@ export default function ProjectEditor() {
   const [loading, setLoading] = useState(true);
   const [sources, setSources] = useState<SourceMedia[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [transcripts, setTranscripts] = useState<Record<string, TranscriptEntry[]>>({});
+  const [transcriptsLoading, setTranscriptsLoading] = useState(false);
 
   const loadSources = useCallback(async () => {
     if (!projectId) return;
@@ -56,6 +60,23 @@ export default function ProjectEditor() {
       console.error("Failed to load sources", err);
     }
   }, [projectId]);
+
+  const loadTranscripts = useCallback(async () => {
+    if (!projectId || sources.length === 0) return;
+    setTranscriptsLoading(true);
+    try {
+      const results: Record<string, TranscriptEntry[]> = {};
+      for (const source of sources) {
+        const transcript = await getTranscript(projectId, source.id);
+        results[source.id] = transcript.entries;
+      }
+      setTranscripts(results);
+    } catch (err) {
+      console.error("Failed to load transcripts", err);
+    } finally {
+      setTranscriptsLoading(false);
+    }
+  }, [projectId, sources]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -72,6 +93,10 @@ export default function ProjectEditor() {
     if (!projectId) return;
     loadSources();
   }, [projectId, loadSources]);
+
+  useEffect(() => {
+    loadTranscripts();
+  }, [loadTranscripts]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,11 +177,40 @@ export default function ProjectEditor() {
         </div>
         <div className="editor-panel transcript-panel">
           <h2>Transcript</h2>
-          <p className="placeholder-text">
-            {sources.length > 0
-              ? "Transcript will appear here after processing."
-              : "Import media to get started."}
-          </p>
+          {sources.length === 0 ? (
+            <p className="placeholder-text">Import media to get started.</p>
+          ) : transcriptsLoading ? (
+            <p className="placeholder-text">Loading transcript...</p>
+          ) : (
+            <div className="transcript-content">
+              {sources.map((source) => {
+                const entries = transcripts[source.id];
+                const hasSpeech = entries && entries.length > 0;
+                return (
+                  <div key={source.id} className="transcript-source">
+                    <h3 className="transcript-source-name">{source.filename}</h3>
+                    {!hasSpeech ? (
+                      <p className="placeholder-text">No speech detected.</p>
+                    ) : (
+                      <p className="transcript-words">
+                        {entries!.map((entry, i) => (
+                          <span
+                            key={i}
+                            className="transcript-word"
+                            data-start-time={entry.start_time}
+                            data-end-time={entry.end_time}
+                            title={`${entry.start_time.toFixed(2)}s - ${entry.end_time.toFixed(2)}s`}
+                          >
+                            {entry.word}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="editor-panel timeline-panel">
           <h2>Timeline</h2>

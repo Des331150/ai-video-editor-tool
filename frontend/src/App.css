@@ -221,3 +221,42 @@ body {
   font-size: 0.75rem;
   flex-shrink: 0;
 }
+
+.transcript-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.transcript-source {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.transcript-source:last-child {
+  border-bottom: none;
+}
+
+.transcript-source-name {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.transcript-words {
+  line-height: 1.8;
+}
+
+.transcript-word {
+  display: inline;
+  cursor: default;
+  padding: 0.1rem 0.05rem;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.transcript-word:hover {
+  background: #e8f0fe;
+  outline: 1px solid #b3d4fc;
+}

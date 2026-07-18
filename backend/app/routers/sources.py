@@ -9,9 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import get_project_or_404
+from app.dependencies import get_project_or_404, get_transcriber
 from app.models.source_media import SourceMedia
+from app.models.transcript import TranscriptEntry
 from app.schemas.source_media import SourceMediaResponse
+from app.services.transcriber import Transcriber
 
 router = APIRouter(prefix="/api/projects/{project_id}/sources", tags=["sources"])
 
@@ -60,6 +62,7 @@ async def upload_source(
     duration: float | None = Form(None),
     db: AsyncSession = Depends(get_db),
     project=Depends(get_project_or_404),
+    transcriber: Transcriber = Depends(get_transcriber),
 ):
     if not file.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename is required")
@@ -99,6 +102,18 @@ async def upload_source(
         source.file_size = file_stat.st_size
         await db.flush()
         await db.refresh(source)
+
+        words = await transcriber.transcribe(str(stored_path))
+        for i, wt in enumerate(words):
+            entry = TranscriptEntry(
+                source_id=source.id,
+                word=wt.word,
+                start_time=wt.start_time,
+                end_time=wt.end_time,
+                position=i,
+            )
+            db.add(entry)
+        await db.flush()
     except Exception:
         if stored_path.exists():
             stored_path.unlink()
